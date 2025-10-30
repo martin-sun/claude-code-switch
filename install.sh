@@ -189,9 +189,9 @@ ccc() {
 
   # Launch Claude Code
   if [[ \${#claude_args[@]} -eq 0 ]]; then
-    exec claude
+    claude
   else
-    exec claude "\${claude_args[@]}"
+    claude "\${claude_args[@]}"
   fi
 }
 $END_MARK

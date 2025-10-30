@@ -506,6 +506,10 @@ switch_account() {
     # 写入 Keychain
     if write_keychain_credentials "$credentials"; then
         echo -e "${GREEN}✅ $(t 'account_switched'): $account_name${NC}"
+
+        # 检查并更新 token（静默执行）
+        compare_and_update_token "$account_name"
+
         echo -e "${YELLOW}⚠️  $(t 'please_restart_claude_code')${NC}"
     else
         echo -e "${RED}❌ $(t 'failed_to_switch_account')${NC}" >&2
@@ -585,6 +589,70 @@ delete_account() {
     chmod 600 "$ACCOUNTS_FILE"
 
     echo -e "${GREEN}✅ $(t 'account_deleted'): $account_name${NC}"
+}
+
+# 比较并更新账号 token
+compare_and_update_token() {
+    local account_name="$1"
+
+    if [[ -z "$account_name" ]]; then
+        return 1
+    fi
+
+    # 读取当前 Keychain 中的凭证
+    local current_credentials=$(read_keychain_credentials)
+    if [[ -z "$current_credentials" ]]; then
+        return 1
+    fi
+
+    # 读取保存的账号凭证
+    local encoded_creds=$(grep -o "\"$account_name\": *\"[^\"]*\"" "$ACCOUNTS_FILE" | cut -d'"' -f4)
+    if [[ -z "$encoded_creds" ]]; then
+        return 1
+    fi
+
+    local saved_credentials=$(echo "$encoded_creds" | base64 -d)
+
+    # 比较凭证是否不同
+    if [[ "$current_credentials" != "$saved_credentials" ]]; then
+        # 更新保存的凭证
+        update_account_token "$account_name" "$current_credentials"
+        return 0
+    fi
+
+    return 1
+}
+
+# 更新账号 token
+update_account_token() {
+    local account_name="$1"
+    local new_credentials="$2"
+
+    if [[ -z "$account_name" || -z "$new_credentials" ]]; then
+        return 1
+    fi
+
+    # 编码新的凭证
+    local encoded_creds=$(echo "$new_credentials" | base64)
+
+    # 更新文件中的账号凭证
+    local temp_file=$(mktemp)
+    if grep -q "\"$account_name\":" "$ACCOUNTS_FILE"; then
+        # 使用 sed 替换现有条目
+        sed -i '' "s/\"$account_name\": *\"[^\"]*\"/\"$account_name\": \"$encoded_creds\"/" "$ACCOUNTS_FILE"
+        chmod 600 "$ACCOUNTS_FILE"
+
+        # 提取订阅类型用于显示
+        local subscription_type=$(echo "$new_credentials" | grep -o '"subscriptionType":"[^"]*"' | cut -d'"' -f4)
+        echo -e "${BLUE}🔄 $(t 'token_updated'): $account_name${NC}" >&2
+        echo -e "   $(t 'subscription_type'): ${subscription_type:-Unknown}" >&2
+    else
+        rm -f "$temp_file"
+        return 1
+    fi
+
+    rm -f "$temp_file"
+    return 0
 }
 
 # 显示当前账号信息

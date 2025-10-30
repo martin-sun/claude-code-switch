@@ -104,9 +104,9 @@ if ! command -v claude >/dev/null 2>&1; then
     exit 127
 fi
 
-# Exec into Claude Code with the configured environment
+# Launch Claude Code with the configured environment
 if [[ ${#claude_args[@]} -eq 0 ]]; then
-    exec claude
+    claude
 else
-    exec claude "${claude_args[@]}"
+    claude "${claude_args[@]}"
 fi

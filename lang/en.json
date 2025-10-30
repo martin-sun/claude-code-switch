@@ -90,5 +90,6 @@
   "account_name": "Account name",
   "token_expires": "Token expires at",
   "access_token": "Access token",
+  "token_updated": "Token updated",
   "account": "Account"
 }

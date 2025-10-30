@@ -90,5 +90,6 @@
   "account_name": "账号名称",
   "token_expires": "Token 过期时间",
   "access_token": "Access Token",
+  "token_updated": "Token 已更新",
   "account": "账号"
 }
