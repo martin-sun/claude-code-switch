@@ -884,14 +884,19 @@ switch_to_glm() {
 switch_to_kimi() {
     echo -e "${YELLOW}🔄 $(t 'switching_to') KIMI2 $(t 'model')...${NC}"
     clean_env
+
+    # 从配置文件读取模型ID，支持自定义
+    local kimi_model="${KIMI_MODEL:-kimi-k2-turbo-preview}"
+    local kimi_small="${KIMI_SMALL_FAST_MODEL:-kimi-k2-turbo-preview}"
+
     if is_effectively_set "$KIMI_API_KEY"; then
         # 官方 Moonshot KIMI 的 Anthropic 兼容端点
         export ANTHROPIC_BASE_URL="https://api.moonshot.cn/anthropic"
         export ANTHROPIC_API_URL="https://api.moonshot.cn/anthropic"
         export ANTHROPIC_AUTH_TOKEN="$KIMI_API_KEY"
         export ANTHROPIC_API_KEY="$KIMI_API_KEY"
-        export ANTHROPIC_MODEL="kimi-k2-turbo-preview"
-        export ANTHROPIC_SMALL_FAST_MODEL="kimi-k2-turbo-preview"
+        export ANTHROPIC_MODEL="$kimi_model"
+        export ANTHROPIC_SMALL_FAST_MODEL="$kimi_small"
         echo -e "${GREEN}✅ $(t 'switched_to') KIMI2（$(t 'official')）${NC}"
     elif is_effectively_set "$PPINFRA_API_KEY"; then
         # 备用：PPINFRA Anthropic 兼容
@@ -899,8 +904,8 @@ switch_to_kimi() {
         export ANTHROPIC_API_URL="https://api.ppinfra.com/anthropic"
         export ANTHROPIC_AUTH_TOKEN="$PPINFRA_API_KEY"
         export ANTHROPIC_API_KEY="$PPINFRA_API_KEY"
-        export ANTHROPIC_MODEL="kimi-k2-turbo-preview"
-        export ANTHROPIC_SMALL_FAST_MODEL="kimi-k2-turbo-preview"
+        export ANTHROPIC_MODEL="$kimi_model"
+        export ANTHROPIC_SMALL_FAST_MODEL="$kimi_small"
         echo -e "${GREEN}✅ $(t 'switched_to') KIMI2（$(t 'ppinfra_backup')）${NC}"
     else
         # 默认体验密钥
@@ -909,8 +914,8 @@ switch_to_kimi() {
         export ANTHROPIC_API_URL="https://api.ppinfra.com/anthropic"
         export ANTHROPIC_AUTH_TOKEN="$hidden_key"
         export ANTHROPIC_API_KEY="$hidden_key"
-        export ANTHROPIC_MODEL="kimi-k2-turbo-preview"
-        export ANTHROPIC_SMALL_FAST_MODEL="kimi-k2-turbo-preview"
+        export ANTHROPIC_MODEL="$kimi_model"
+        export ANTHROPIC_SMALL_FAST_MODEL="$kimi_small"
         echo -e "${GREEN}✅ $(t 'switched_to') KIMI2（$(t 'default_experience_key')）${NC}"
     fi
     echo "   BASE_URL: $ANTHROPIC_BASE_URL"
