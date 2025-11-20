@@ -91,5 +91,6 @@
   "token_expires": "Token expires at",
   "access_token": "Access token",
   "token_updated": "Token updated",
-  "account": "Account"
+  "account": "Account",
+  "zenmux_features": "Official: google/gemini-3-pro-preview-free"
 }

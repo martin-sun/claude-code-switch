@@ -91,5 +91,6 @@
   "token_expires": "Token 过期时间",
   "access_token": "Access Token",
   "token_updated": "Token 已更新",
-  "account": "账号"
+  "account": "账号",
+  "zenmux_features": "官方：google/gemini-3-pro-preview-free"
 }

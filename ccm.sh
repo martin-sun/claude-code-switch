@@ -117,6 +117,9 @@ LONGCAT_API_KEY=your-longcat-api-key
 # MiniMax M2
 MINIMAX_API_KEY=your-minimax-api-key
 
+# ZenmuxAI
+ZENMUX_API_KEY=your-zenmux-api-key
+
 # Qwen（阿里云 DashScope）
 QWEN_API_KEY=your-qwen-api-key
 
@@ -145,6 +148,8 @@ LONGCAT_MODEL=LongCat-Flash-Thinking
 LONGCAT_SMALL_FAST_MODEL=LongCat-Flash-Chat
 MINIMAX_MODEL=MiniMax-M2
 MINIMAX_SMALL_FAST_MODEL=MiniMax-M2
+ZENMUX_MODEL=google/gemini-3-pro-preview-free
+ZENMUX_SMALL_FAST_MODEL=google/gemini-3-pro-preview-free
 
 EOF
         echo -e "${YELLOW}⚠️  $(t 'config_created'): $CONFIG_FILE${NC}" >&2
@@ -232,6 +237,9 @@ LONGCAT_API_KEY=your-longcat-api-key
 # MiniMax M2
 MINIMAX_API_KEY=your-minimax-api-key
 
+# ZenmuxAI
+ZENMUX_API_KEY=your-zenmux-api-key
+
 # Qwen（阿里云 DashScope）
 QWEN_API_KEY=your-qwen-api-key
 
@@ -260,6 +268,8 @@ LONGCAT_MODEL=LongCat-Flash-Thinking
 LONGCAT_SMALL_FAST_MODEL=LongCat-Flash-Chat
 MINIMAX_MODEL=MiniMax-M2
 MINIMAX_SMALL_FAST_MODEL=MiniMax-M2
+ZENMUX_MODEL=google/gemini-3-pro-preview-free
+ZENMUX_SMALL_FAST_MODEL=google/gemini-3-pro-preview-free
 
 EOF
     echo -e "${YELLOW}⚠️  $(t 'config_created'): $CONFIG_FILE${NC}" >&2
@@ -714,6 +724,7 @@ show_status() {
     echo "   KIMI_API_KEY: $(mask_presence KIMI_API_KEY)"
     echo "   LONGCAT_API_KEY: $(mask_presence LONGCAT_API_KEY)"
     echo "   MINIMAX_API_KEY: $(mask_presence MINIMAX_API_KEY)"
+    echo "   ZENMUX_API_KEY: $(mask_presence ZENMUX_API_KEY)"
     echo "   DEEPSEEK_API_KEY: $(mask_presence DEEPSEEK_API_KEY)"
     echo "   QWEN_API_KEY: $(mask_presence QWEN_API_KEY)"
     echo "   PPINFRA_API_KEY: $(mask_presence PPINFRA_API_KEY)"
@@ -1035,6 +1046,35 @@ switch_to_kat() {
     echo "   SMALL_MODEL: $ANTHROPIC_SMALL_FAST_MODEL"
 }
 
+# 切换到ZenmuxAI
+switch_to_zenmux() {
+    echo -e "${YELLOW}🔄 $(t 'switching_to') ZenmuxAI $(t 'model')...${NC}"
+    clean_env
+    if is_effectively_set "$ZENMUX_API_KEY"; then
+        # ZenmuxAI 的 Anthropic 兼容端点
+        export ANTHROPIC_BASE_URL="https://zenmux.ai/api/anthropic"
+        export ANTHROPIC_API_URL="https://zenmux.ai/api/anthropic"
+        export ANTHROPIC_AUTH_TOKEN="$ZENMUX_API_KEY"
+        export ANTHROPIC_API_KEY="$ZENMUX_API_KEY"
+        # 使用 ZenmuxAI 支持的模型
+        local zenmux_model="${ZENMUX_MODEL:-google/gemini-3-pro-preview-free}"
+        local zenmux_small="${ZENMUX_SMALL_FAST_MODEL:-google/gemini-3-pro-preview-free}"
+        export ANTHROPIC_MODEL="$zenmux_model"
+        export ANTHROPIC_SMALL_FAST_MODEL="$zenmux_small"
+        echo -e "${GREEN}✅ $(t 'switched_to') ZenmuxAI（$(t 'official')）${NC}"
+    else
+        echo -e "${RED}❌ $(t 'missing_api_key'): ZENMUX_API_KEY${NC}"
+        echo "$(t 'please_set_in_config'): ZENMUX_API_KEY"
+        echo ""
+        echo "$(t 'example_config'):"
+        echo "  export ZENMUX_API_KEY='YOUR_API_KEY'"
+        return 1
+    fi
+    echo "   BASE_URL: $ANTHROPIC_BASE_URL"
+    echo "   MODEL: $ANTHROPIC_MODEL"
+    echo "   SMALL_MODEL: $ANTHROPIC_SMALL_FAST_MODEL"
+}
+
 # 切换到PPINFRA服务
 switch_to_ppinfra() {
     local target="${1:-}"
@@ -1156,6 +1196,7 @@ show_help() {
     echo "  kimi, kimi2        - env kimi"
     echo "  kat                - env kat"
     echo "  longcat, lc        - env longcat"
+    echo "  zenmux             - env zenmux"
     echo "  minimax, mm        - env minimax"
     echo "  qwen               - env qwen"
     echo "  glm, glm4          - env glm"
@@ -1191,6 +1232,7 @@ show_help() {
     echo "  🤖 Deepseek            - 官方：deepseek-chat ｜ 备用：deepseek/deepseek-v3.1 (PPINFRA)"
     echo "  🌊 StreamLake (KAT)    - 官方：KAT-Coder"
     echo "  🐱 LongCat             - 官方：LongCat-Flash-Thinking / LongCat-Flash-Chat"
+    echo "  ⚡ ZenmuxAI            - 官方：google/gemini-3-pro-preview-free"
     echo "  🎯 MiniMax M2          - 官方：MiniMax-M2 ｜ 备用：MiniMax-M2 (PPINFRA)"
     echo "  🐪 Qwen                - 官方：qwen3-max (阿里云) ｜ 备用：qwen3-next-80b-a3b-thinking (PPINFRA)"
     echo "  🇨🇳 GLM4.6             - 官方：glm-4.6 / glm-4.5-air"
@@ -1213,6 +1255,8 @@ ensure_model_override_defaults() {
         "LONGCAT_SMALL_FAST_MODEL=LongCat-Flash-Chat"
         "MINIMAX_MODEL=MiniMax-M2"
         "MINIMAX_SMALL_FAST_MODEL=MiniMax-M2"
+        "ZENMUX_MODEL=google/gemini-3-pro-preview-free"
+        "ZENMUX_SMALL_FAST_MODEL=google/gemini-3-pro-preview-free"
         "QWEN_MODEL=qwen3-max"
         "QWEN_SMALL_FAST_MODEL=qwen3-next-80b-a3b-instruct"
         "GLM_MODEL=glm-4.6"
@@ -1572,8 +1616,31 @@ emit_env_exports() {
                 return 1
             fi
             ;;
+        "zenmux")
+            if ! is_effectively_set "$ZENMUX_API_KEY"; then
+                # 兜底：直接 source 配置文件一次
+                if [ -f "$HOME/.ccm_config" ]; then . "$HOME/.ccm_config" >/dev/null 2>&1; fi
+            fi
+            if is_effectively_set "$ZENMUX_API_KEY"; then
+                echo "$prelude"
+                echo "export API_TIMEOUT_MS='600000'"
+                echo "export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC='1'"
+                echo "export ANTHROPIC_BASE_URL='https://zenmux.ai/api/anthropic'"
+                echo "export ANTHROPIC_API_URL='https://zenmux.ai/api/anthropic'"
+                echo "if [ -z \"\${ZENMUX_API_KEY}\" ] && [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
+                echo "export ANTHROPIC_AUTH_TOKEN=\"\${ZENMUX_API_KEY}\""
+                local zenmux_model="${ZENMUX_MODEL:-google/gemini-3-pro-preview-free}"
+                local zenmux_small="${ZENMUX_SMALL_FAST_MODEL:-google/gemini-3-pro-preview-free}"
+                echo "export ANTHROPIC_MODEL='${zenmux_model}'"
+                echo "export ANTHROPIC_SMALL_FAST_MODEL='${zenmux_small}'"
+            else
+                echo "# ❌ $(t 'missing_api_key'): ZENMUX_API_KEY" 1>&2
+                echo "# $(t 'please_set_in_config'): ZENMUX_API_KEY" 1>&2
+                return 1
+            fi
+            ;;
         *)
-            echo "# $(t 'usage'): $(basename "$0") env [deepseek|kimi|qwen|glm|claude|opus|minimax|kat]" 1>&2
+            echo "# $(t 'usage'): $(basename "$0") env [deepseek|kimi|qwen|glm|claude|opus|minimax|kat|zenmux]" 1>&2
             return 1
             ;;
     esac
@@ -1648,6 +1715,9 @@ main() {
             ;;
         "kat")
             emit_env_exports kat
+            ;;
+        "zenmux")
+            emit_env_exports zenmux
             ;;
         "longcat"|"lc")
             emit_env_exports longcat
