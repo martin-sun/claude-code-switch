@@ -1195,7 +1195,8 @@ show_help() {
     echo ""
     echo -e "${YELLOW}$(t 'model_options'):${NC}"
     echo "  deepseek, ds       - env deepseek"
-    echo "  kimi, kimi2        - env kimi"
+    echo "  kimi, kimi2        - env kimi (Moonshot API)"
+    echo "  kimicode, kc       - env kimicode (Kimi Code API)"
     echo "  kat                - env kat"
     echo "  longcat, lc        - env longcat"
     echo "  zenmux             - env zenmux"
@@ -1230,7 +1231,8 @@ show_help() {
     echo "  $(basename "$0") opus:personal               # Switch to 'personal' account with Opus"
     echo ""
     echo -e "${YELLOW}支持的模型:${NC}"
-    echo "  🌙 KIMI2               - 官方：kimi-k2-turbo-preview"
+    echo "  🌙 KIMI2               - 官方：kimi-k2-turbo-preview (Moonshot API)"
+    echo "  🌙 Kimi Code           - 官方：kimi-for-coding (Kimi Code API)"
     echo "  🤖 Deepseek            - 官方：deepseek-chat ｜ 备用：deepseek/deepseek-v3.1 (PPINFRA)"
     echo "  🌊 StreamLake (KAT)    - 官方：KAT-Coder"
     echo "  🐱 LongCat             - 官方：LongCat-Flash-Thinking / LongCat-Flash-Chat"
@@ -1379,7 +1381,29 @@ emit_env_exports() {
                 echo "export ANTHROPIC_SMALL_FAST_MODEL='${ds_small}'"
             fi
             ;;
+        "kimicode"|"kc")
+            # Kimi Code 平台 (kimi.com/code) - 使用 coding plan
+            if is_effectively_set "$KIMI_API_KEY"; then
+                echo "$prelude"
+                echo "export API_TIMEOUT_MS='600000'"
+                echo "export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC='1'"
+                echo "export ANTHROPIC_BASE_URL='https://api.kimi.com/coding/'"
+                echo "export ANTHROPIC_API_URL='https://api.kimi.com/coding/'"
+                echo "if [ -z \"\${KIMI_API_KEY}\" ] && [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
+                echo "export ANTHROPIC_AUTH_TOKEN=\"\${KIMI_API_KEY}\""
+                echo "export ANTHROPIC_API_KEY=\"\${KIMI_API_KEY}\""
+                local kc_model="${KIMICODE_MODEL:-kimi-for-coding}"
+                local kc_small="${KIMICODE_SMALL_FAST_MODEL:-kimi-for-coding}"
+                echo "export ANTHROPIC_MODEL='${kc_model}'"
+                echo "export ANTHROPIC_SMALL_FAST_MODEL='${kc_small}'"
+            else
+                echo "# ❌ KIMI_API_KEY not set for Kimi Code" >&2
+                echo "# Please set KIMI_API_KEY in ~/.ccm_config with your sk-kimi-xxx key" >&2
+                return 1
+            fi
+            ;;
         "kimi"|"kimi2")
+            # Moonshot AI 平台 (moonshot.cn) - 通用 API
             if is_effectively_set "$KIMI_API_KEY"; then
                 echo "$prelude"
                 echo "export API_TIMEOUT_MS='600000'"
@@ -1711,6 +1735,9 @@ main() {
             ;;
         "kimi"|"kimi2")
             emit_env_exports kimi
+            ;;
+        "kimicode"|"kc")
+            emit_env_exports kimicode
             ;;
         "qwen")
             emit_env_exports qwen
