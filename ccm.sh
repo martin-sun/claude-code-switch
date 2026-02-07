@@ -123,6 +123,9 @@ ZENMUX_API_KEY=your-zenmux-api-key
 # Qwen（阿里云 DashScope）
 QWEN_API_KEY=your-qwen-api-key
 
+# MThreads (摩尔线程 Coding Plan)
+MTHREADS_API_KEY=your-mthreads-api-key
+
 # Claude (如果使用API key而非Pro订阅)
 CLAUDE_API_KEY=your-claude-api-key
 
@@ -144,6 +147,8 @@ OPUS_MODEL=claude-opus-4-1-20250805
 OPUS_SMALL_FAST_MODEL=claude-sonnet-4-5-20250929
 HAIKU_MODEL=claude-haiku-4-5
 HAIKU_SMALL_FAST_MODEL=claude-haiku-4-5
+MTHREADS_MODEL=GLM-4.7
+MTHREADS_SMALL_FAST_MODEL=GLM-4.7
 LONGCAT_MODEL=LongCat-Flash-Thinking
 LONGCAT_SMALL_FAST_MODEL=LongCat-Flash-Chat
 MINIMAX_MODEL=MiniMax-M2.1
@@ -243,6 +248,9 @@ ZENMUX_API_KEY=your-zenmux-api-key
 # Qwen（阿里云 DashScope）
 QWEN_API_KEY=your-qwen-api-key
 
+# MThreads (摩尔线程 Coding Plan)
+MTHREADS_API_KEY=your-mthreads-api-key
+
 # Claude (如果使用API key而非Pro订阅)
 CLAUDE_API_KEY=your-claude-api-key
 
@@ -264,6 +272,8 @@ OPUS_MODEL=claude-opus-4-1-20250805
 OPUS_SMALL_FAST_MODEL=claude-sonnet-4-5-20250929
 HAIKU_MODEL=claude-haiku-4-5
 HAIKU_SMALL_FAST_MODEL=claude-haiku-4-5
+MTHREADS_MODEL=GLM-4.7
+MTHREADS_SMALL_FAST_MODEL=GLM-4.7
 LONGCAT_MODEL=LongCat-Flash-Thinking
 LONGCAT_SMALL_FAST_MODEL=LongCat-Flash-Chat
 MINIMAX_MODEL=MiniMax-M2.1
@@ -727,6 +737,7 @@ show_status() {
     echo "   ZENMUX_API_KEY: $(mask_presence ZENMUX_API_KEY)"
     echo "   DEEPSEEK_API_KEY: $(mask_presence DEEPSEEK_API_KEY)"
     echo "   QWEN_API_KEY: $(mask_presence QWEN_API_KEY)"
+    echo "   MTHREADS_API_KEY: $(mask_presence MTHREADS_API_KEY)"
     echo "   PPINFRA_API_KEY: $(mask_presence PPINFRA_API_KEY)"
 }
 
@@ -1077,6 +1088,36 @@ switch_to_zenmux() {
     echo "   SMALL_MODEL: $ANTHROPIC_SMALL_FAST_MODEL"
 }
 
+# 切换到MThreads (摩尔线程)
+switch_to_mthreads() {
+    echo -e "${YELLOW}🔄 $(t 'switching_to') MThreads (摩尔线程) $(t 'model')...${NC}"
+    clean_env
+    if is_effectively_set "$MTHREADS_API_KEY"; then
+        # 摩尔线程 Coding Plan Anthropic 兼容端点
+        export ANTHROPIC_BASE_URL="https://coding-plan-endpoint.kuaecloud.net"
+        export ANTHROPIC_API_URL="https://coding-plan-endpoint.kuaecloud.net"
+        export ANTHROPIC_AUTH_TOKEN="$MTHREADS_API_KEY"
+        export ANTHROPIC_API_KEY="$MTHREADS_API_KEY"
+        local mt_model="${MTHREADS_MODEL:-GLM-4.7}"
+        local mt_small="${MTHREADS_SMALL_FAST_MODEL:-GLM-4.7}"
+        export ANTHROPIC_MODEL="$mt_model"
+        export ANTHROPIC_SMALL_FAST_MODEL="$mt_small"
+        echo -e "${GREEN}✅ $(t 'switched_to') MThreads (摩尔线程)（$(t 'official')）${NC}"
+    else
+        echo -e "${RED}❌ $(t 'missing_api_key'): MTHREADS_API_KEY${NC}"
+        echo "$(t 'please_set_in_config'): MTHREADS_API_KEY"
+        echo ""
+        echo "$(t 'example_config'):"
+        echo "  export MTHREADS_API_KEY='YOUR_API_KEY'"
+        echo ""
+        echo "$(t 'get_endpoint_id_from'): https://www.mthreads.com/"
+        return 1
+    fi
+    echo "   BASE_URL: $ANTHROPIC_BASE_URL"
+    echo "   MODEL: $ANTHROPIC_MODEL"
+    echo "   SMALL_MODEL: $ANTHROPIC_SMALL_FAST_MODEL"
+}
+
 # 切换到PPINFRA服务
 switch_to_ppinfra() {
     local target="${1:-}"
@@ -1202,6 +1243,7 @@ show_help() {
     echo "  zenmux             - env zenmux"
     echo "  minimax, mm        - env minimax"
     echo "  qwen               - env qwen"
+    echo "  mthreads, mt       - env mthreads"
     echo "  glm, glm4          - env glm"
     echo "  claude, sonnet, s  - env claude"
     echo "  opus, o            - env opus"
@@ -1240,6 +1282,7 @@ show_help() {
     echo "  🎯 MiniMax M2          - 官方：MiniMax-M2 ｜ 备用：MiniMax-M2 (PPINFRA)"
     echo "  🐪 Qwen                - 官方：qwen3-max (阿里云) ｜ 备用：qwen3-next-80b-a3b-thinking (PPINFRA)"
     echo "  🇨🇳 GLM4.6             - 官方：glm-4.6 / glm-4.5-air"
+    echo "  🔶 MThreads (摩尔线程) - 官方：GLM-4.7"
     echo "  🧠 Claude Sonnet 4.5   - claude-sonnet-4-5-20250929"
     echo "  🚀 Claude Opus 4.1     - claude-opus-4-1-20250805"
     echo "  🔷 Claude Haiku 4.5    - claude-haiku-4-5"
@@ -1271,6 +1314,8 @@ ensure_model_override_defaults() {
         "OPUS_SMALL_FAST_MODEL=claude-sonnet-4-5-20250929"
         "HAIKU_MODEL=claude-haiku-4-5"
         "HAIKU_SMALL_FAST_MODEL=claude-haiku-4-5"
+        "MTHREADS_MODEL=GLM-4.7"
+        "MTHREADS_SMALL_FAST_MODEL=GLM-4.7"
     )
     local added_header=0
     for pair in "${pairs[@]}"; do
@@ -1665,8 +1710,31 @@ emit_env_exports() {
                 return 1
             fi
             ;;
+        "mthreads"|"mt")
+            if ! is_effectively_set "$MTHREADS_API_KEY"; then
+                if [ -f "$HOME/.ccm_config" ]; then . "$HOME/.ccm_config" >/dev/null 2>&1; fi
+            fi
+            if is_effectively_set "$MTHREADS_API_KEY"; then
+                echo "$prelude"
+                echo "export API_TIMEOUT_MS='600000'"
+                echo "export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC='1'"
+                echo "export ANTHROPIC_BASE_URL='https://coding-plan-endpoint.kuaecloud.net'"
+                echo "export ANTHROPIC_API_URL='https://coding-plan-endpoint.kuaecloud.net'"
+                echo "if [ -z \"\${MTHREADS_API_KEY}\" ] && [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
+                echo "export ANTHROPIC_AUTH_TOKEN=\"\${MTHREADS_API_KEY}\""
+                echo "export ANTHROPIC_API_KEY=\"\${MTHREADS_API_KEY}\""
+                local mt_model="${MTHREADS_MODEL:-GLM-4.7}"
+                local mt_small="${MTHREADS_SMALL_FAST_MODEL:-GLM-4.7}"
+                echo "export ANTHROPIC_MODEL='${mt_model}'"
+                echo "export ANTHROPIC_SMALL_FAST_MODEL='${mt_small}'"
+            else
+                echo "# ❌ $(t 'missing_api_key'): MTHREADS_API_KEY" 1>&2
+                echo "# $(t 'please_set_in_config'): MTHREADS_API_KEY" 1>&2
+                return 1
+            fi
+            ;;
         *)
-            echo "# $(t 'usage'): $(basename "$0") env [deepseek|kimi|qwen|glm|claude|opus|minimax|kat|zenmux]" 1>&2
+            echo "# $(t 'usage'): $(basename "$0") env [deepseek|kimi|qwen|glm|claude|opus|minimax|kat|zenmux|mthreads]" 1>&2
             return 1
             ;;
     esac
@@ -1747,6 +1815,9 @@ main() {
             ;;
         "zenmux")
             emit_env_exports zenmux
+            ;;
+        "mthreads"|"mt")
+            emit_env_exports mthreads
             ;;
         "longcat"|"lc")
             emit_env_exports longcat

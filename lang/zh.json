@@ -92,5 +92,6 @@
   "access_token": "Access Token",
   "token_updated": "Token 已更新",
   "account": "账号",
-  "zenmux_features": "官方：google/gemini-3-pro-preview-free"
+  "zenmux_features": "官方：google/gemini-3-pro-preview-free",
+  "mthreads_features": "官方：GLM-4.7 (摩尔线程 Coding Plan)"
 }

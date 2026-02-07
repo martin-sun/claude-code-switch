@@ -92,5 +92,6 @@
   "access_token": "Access token",
   "token_updated": "Token updated",
   "account": "Account",
-  "zenmux_features": "Official: google/gemini-3-pro-preview-free"
+  "zenmux_features": "Official: google/gemini-3-pro-preview-free",
+  "mthreads_features": "Official: GLM-4.7 (MThreads Coding Plan)"
 }
