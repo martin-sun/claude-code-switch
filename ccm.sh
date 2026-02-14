@@ -865,18 +865,18 @@ switch_to_haiku() {
     echo "   SMALL_MODEL: $ANTHROPIC_SMALL_FAST_MODEL"
 }
 
-# 切换到GLM4.6
+# 切换到GLM (Z.AI)
 switch_to_glm() {
-    echo -e "${YELLOW}🔄 切换到 GLM4.6 模型...${NC}"
+    echo -e "${YELLOW}🔄 切换到 GLM 模型 (Z.AI)...${NC}"
     clean_env
     if is_effectively_set "$GLM_API_KEY"; then
-        export ANTHROPIC_BASE_URL="https://open.bigmodel.cn/api/anthropic"
-        export ANTHROPIC_API_URL="https://open.bigmodel.cn/api/anthropic"
+        export ANTHROPIC_BASE_URL="https://api.z.ai/api/anthropic"
+        export ANTHROPIC_API_URL="https://api.z.ai/api/anthropic"
         export ANTHROPIC_AUTH_TOKEN="$GLM_API_KEY"
         export ANTHROPIC_API_KEY="$GLM_API_KEY"
-        export ANTHROPIC_MODEL="glm-4.6"
-        export ANTHROPIC_SMALL_FAST_MODEL="glm-4.6"
-        echo -e "${GREEN}✅ 已切换到 GLM4.6（官方）${NC}"
+        export ANTHROPIC_MODEL="${GLM_MODEL:-glm-5}"
+        export ANTHROPIC_SMALL_FAST_MODEL="${GLM_SMALL_FAST_MODEL:-glm-4.7}"
+        echo -e "${GREEN}✅ 已切换到 GLM（Z.AI 官方）${NC}"
     elif is_effectively_set "$PPINFRA_API_KEY"; then
         # 备用：PPINFRA GLM 支持
         export ANTHROPIC_BASE_URL="https://api.ppinfra.com/anthropic"
@@ -1528,17 +1528,17 @@ emit_env_exports() {
                 echo "export ANTHROPIC_SMALL_FAST_MODEL='${qwen_small}'"
             fi
             ;;
-        "glm"|"glm4"|"glm4.6")
+        "glm"|"glm5")
             if is_effectively_set "$GLM_API_KEY"; then
                 echo "$prelude"
                 echo "export API_TIMEOUT_MS='600000'"
                 echo "export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC='1'"
-                echo "export ANTHROPIC_BASE_URL='https://open.bigmodel.cn/api/anthropic'"
-                echo "export ANTHROPIC_API_URL='https://open.bigmodel.cn/api/anthropic'"
+                echo "export ANTHROPIC_BASE_URL='https://api.z.ai/api/anthropic'"
+                echo "export ANTHROPIC_API_URL='https://api.z.ai/api/anthropic'"
                 echo "if [ -z \"\${GLM_API_KEY}\" ] && [ -f \"\$HOME/.ccm_config\" ]; then . \"\$HOME/.ccm_config\" >/dev/null 2>&1; fi"
                 echo "export ANTHROPIC_AUTH_TOKEN=\"\${GLM_API_KEY}\""
-                local glm_model="${GLM_MODEL:-glm-4.6}"
-                local glm_small="${GLM_SMALL_FAST_MODEL:-glm-4.5-air}"
+                local glm_model="${GLM_MODEL:-glm-5}"
+                local glm_small="${GLM_SMALL_FAST_MODEL:-glm-4.7}"
                 echo "export ANTHROPIC_MODEL='${glm_model}'"
                 echo "export ANTHROPIC_SMALL_FAST_MODEL='${glm_small}'"
             elif is_effectively_set "$PPINFRA_API_KEY"; then
